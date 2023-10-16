@@ -1,0 +1,40 @@
+---
+- name: Get current timestamp from the ansible host
+  hosts: localhost
+  collections:
+    - dellemc.enterprise_sonic
+  gather_facts: false
+
+  tasks:
+  - name: Query time & date from system
+    shell: "date +%d-%m-%Y%Hh-%Mm-%Ss"
+    register: tstamp
+
+  - name: Set variables
+    set_fact:
+      cur_date: "{{ tstamp.stdout[0:10]}}"
+      cur_time: "{{ tstamp.stdout[10:]}}"
+
+- name: Backup configuration of Dell SONiC devices
+  hosts: fabric
+  vars:
+    cur_date: "{{ hostvars['localhost']['cur_date'] }}"
+    cur_time: "{{ hostvars['localhost']['cur_time'] }}"
+    filesuffix: "_config-{{ cur_date }}-{{ cur_time }}.txt"
+    backupdir: /tmp
+
+  tasks:
+  - name: Collecting configs from devices
+    dellemc.enterprise_sonic.sonic_command:
+      commands:
+        - show running-configuration
+    
+    register: config
+    vars:
+        ansible_connection: network_cli
+
+  - name: Storing configs
+    copy:
+      content: "{{ config.stdout[0] }}"
+      dest: "{{ backupdir }}/{{ inventory_hostname }}{{ filesuffix }}"
+...
