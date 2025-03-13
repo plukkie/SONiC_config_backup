@@ -17,11 +17,14 @@
 
 - name: Backup configuration of Dell SONiC devices
   hosts: fabric
+  collections:
+    - dellemc.enterprise_sonic
   vars:
     cur_date: "{{ hostvars['localhost']['cur_date'] }}"
     cur_time: "{{ hostvars['localhost']['cur_time'] }}"
     filesuffix: "_config-{{ cur_date }}-{{ cur_time }}.txt"
     backupdir: /tmp
+    ansible_network_os: dellemc.enterprise_sonic.sonic
 
   tasks:
   - name: Collecting configs from devices
@@ -33,8 +36,12 @@
     vars:
         ansible_connection: network_cli
 
-  - name: Storing configs
+  - name: Storing configs to folder {{ backupdir }}/..
     copy:
       content: "{{ config.stdout[0] }}"
       dest: "{{ backupdir }}/{{ inventory_hostname }}{{ filesuffix }}"
+
+  - name: Config files written 
+    ansible.builtin.debug:
+      msg:  "{{ backupdir }}/{{ inventory_hostname }}{{ filesuffix }}"
 ...

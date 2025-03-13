@@ -1,16 +1,22 @@
+sonic-SPINE-1 ansible_host=10.10.10.21
+#sonic-SPINE-2 ansible_host=10.10.10.22
+sonic-LEAF-1 ansible_host=10.10.10.11
+sonic-LEAF-2 ansible_host=10.10.10.12
+#sonic-LEAF-3 ansible_host=10.10.10.13
+#sonic-LEAF-4 ansible_host=10.10.10.14
+
 [all:vars]
 ansible_connection=network_cli
 ansible_user=admin
-ansible_password=YourPaSsWoRd
-ansible_network_os=dellemc.enterprise_sonic.sonic
+ansible_password=admin123
 
-[leafs]
-leaf1 ansible_host=10.10.10.250
-leaf2 ansible_host=10.10.10.123
+[spine]
+sonic-SPINE-1
 
-[spines]
-spine1 ansible_host=10.10.10.244
+[leaf]
+sonic-LEAF-1
+sonic-LEAF-2
 
 [fabric:children]
-leafs
-spines
+spine
+leaf
